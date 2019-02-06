@@ -15,8 +15,8 @@ phrases = [
 ]
 
 
-font = "Times New Roman"
-font_size = 85
+font = "FreeMono"
+font_size = 60
 phrase_color = "lightblue"
 colors = ['white', '#a5c13e','#c1973e','#aaaaa9']
 main_font_color = "#ff4f1f"
@@ -97,7 +97,7 @@ def clear_screen():
 
 def show_start_screen():
     clear_screen()
-    Text(app, text="Welcome to Rotary Phone Texting", size=100, font=font, grid=[0,0] , color=main_font_color,align='center')
+    Text(app, text="Welcome to Rotary Phone Texting", size=65, font=font, grid=[0,0] , color=main_font_color,align='center')
 
 def clicked(key):
     print(key.key)
