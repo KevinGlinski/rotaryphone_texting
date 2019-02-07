@@ -1,5 +1,15 @@
 from datetime import datetime 
 
+from guizero import App, Text, Window
+from random import randint
+
+
+font = "FreeMono"
+font_size = 60
+colors = ['#aaaaa9', '#c1973e','white','#a5c13e']
+main_font_color = "#ff4f1f"
+
+
 number_to_char_map = {
     2: 'a',
     3: 'd',
@@ -47,21 +57,45 @@ class Player:
     target_message = ''
     on_hook = True
     start = datetime.now()
+    app = None
+    is_winner = False
+    is_complete = False
         
-    def __init__(self, index, target_message):
+    def __init__(self, index, app, target_message):
         self.index = index
         self.target_message = target_message
+        
+        self.app = app
+        self.player_name_text = Text(app, text="Player {}".format(index + 1), size=font_size, font=font, color=colors[index], grid=[0,(index +1) * 2, 3,1], align='left') 
+        self.text = Text(app, text="", size=font_size, font=font, color=colors[index], grid=[0,((index +1) * 2) + 1, 3,1],align='left') 
+        
+        
 
-    def phone_on_hook(self, on_hook):
+    def phone_on_hook(self, on_hook, can_win_game):
+        if self.is_complete:
+            return
+        
+        
         self.on_hook = on_hook
         if self.on_hook:
             end = datetime.now()
             completed_time = end - self.start
             print("Player " + str(self.index) + " is DONE with { " + self.message + " } in " + "{}".format(completed_time) + " seconds")
-            self.message = ""
+            self.text.value = self.message
+            
+            if self.target_message.lower() == self.message.lower() and can_win_game:
+                self.is_winner = True
+                self.player_name_text.value = self.player_name_text.value + "(WINNER) "
+                self.is_complete = True
+                
+            if self.target_message.lower() == self.message.lower() and not can_win_game:
+                self.is_winner = False
+                self.is_complete = True
+            
         else:
             print("Player " + str(self.index) + " is STARTING!")
             self.start = datetime.now()
+            self.text.value = self.message + "_"
         
     def digit_received(self):
         if self.on_hook:
@@ -73,7 +107,7 @@ class Player:
 
         if digit == 1:
             self.character_received(None)
-            return
+            return self.message
         
         char = self.calculate_character(digit)
         print("char: " + str(char))
@@ -84,17 +118,26 @@ class Player:
         if char == None:
             #remove last character
             self.message = self.message[:-1]
+            self.text.value = self.message + "_"
             return
         
         self.message = self.message + char
         print("message: " + self.message)
+        self.text.value = self.message + "_"
+        
 
     def count_digit(self):
             self.count += 1
 
     def calculate_character(self, digit):
-        next_expected_char = self.target_message[len(self.message):][0].lower()
-        next_expected_char_digit = char_map[next_expected_char]
+        if digit <= 0 or digit > 10:
+            return " "
+        
+        if len(self.message) >= len(self.target_message):
+            return number_to_char_map[digit]
+        else:
+            next_expected_char = self.target_message[len(self.message):][0].lower()
+            next_expected_char_digit = char_map[next_expected_char]
 
         if digit == next_expected_char_digit:
             return next_expected_char
@@ -103,102 +146,5 @@ class Player:
             return
 
         return number_to_char_map[digit]
-
-        # if digit == 2:
-        #     return 'a'
-        # if digit == 3:
-        #     if not self.message:
-        #         return 'f'
-        #     elif self.message.endswith("l"):
-        #         return 'd'
-        #     return 'e'
-        # if digit == 4:
-        #     if self.message:
-        #         if self.message.endswith("t") or self.message.endswith("g"):
-        #             return 'h'
-        #         return 'g'
-        #     elif len(self.message) == 1:
-        #         return 'i'
-        #     return 'h'
-        # if digit == 5:
-        #     if self.message.endswith("n"):
-        #         return 'k'
-        #     return 'l'
-        # if digit == 6:
-        #     if self.message:
-        #         if self.message.endswith("a"):
-        #             return 'n'
-        #         return 'o'
-        #     return 'm'
-        # if digit == 7:
-        #     if self.message:
-        #         if self.message.endswith("o"):
-        #             return 'r'
-        #         return 's'
-        #     return 'p'
-        # if digit == 8:
-        #     if self.message:
-        #         return 'u'
-        #     return 't'
-        # if digit == 9:
-        #     if len(self.message.split()) == 1:
-        #         return 'w'
-        #     return 'y'
-        # if digit == 10:
-        #     return " "
-        
-# message = 'test message'
-
-# player = Player(1, message)
-# #h
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.on_hook = True
-# player.digit_received()
-# #e
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.on_hook = True
-# player.digit_received()
-# #l
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.on_hook = True
-# player.digit_received()
-# #l
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.on_hook = True
-# player.digit_received()
-# #0
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.on_hook = True
-# player.digit_received()
-# #10
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.count_digit()
-# player.on_hook = True
-# player.digit_received()
-# input("")
+      
+    
